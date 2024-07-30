@@ -2,31 +2,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # PHYSICS
+lX = 10.0
 c = -1.0
 
 # NUMERICS
 dt = 0.01
 nSteps = 100
+nX = 100
 
 # PREPROCESSING
-t = np.linspace(0, nSteps * dt, nSteps + 1)
-p = np.zeros(nSteps + 1)
+x = np.linspace(-0.5 * lX, 0.5 * lX, nX)
 
 # INITIAL CONDITIONS
-p[0] = 1.0    # p0
+p0 = 1.0
+p = np.exp(-p0 * x * x)
 
 plt.ion()    # interactive mode
-plt.xlim(0, nSteps * dt)
-plt.ylim(0, p[0])
-plt.title('0')
-graph = plt.plot(t[:1], p[:1])[0]
-plt.pause(0.01)
+graph = plt.plot(x, p)[0]
+plt.pause(0.1)
 
 # ACTION LOOP
 for i in range(nSteps):
-    dpdt = c * p[i]
-    p[i + 1] = p[i] + dpdt * dt
+    dpdt = c * p
+    p = p + dpdt * dt
     graph.remove()
-    graph = plt.plot(t[:i+2], p[:i+2])[0]
+    graph = plt.plot(x, p)[0]
     plt.title(str(i+1))
     plt.pause(0.001)
