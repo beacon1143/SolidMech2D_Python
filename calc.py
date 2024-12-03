@@ -25,7 +25,7 @@ dt = cfl * min(dX, dY) / np.sqrt((K + 4.0 * G / 3.0) / rho)
 
 # INITIAL CONDITIONS
 p0 = 1.0
-p = np.exp(-p0 * (x * x + y * y))
+p = p0 * np.exp(-x * x - y * y)
 tauXX = np.zeros((nX, nY))
 tauYY = np.zeros((nX, nY))
 tauXY = np.zeros((nX - 1, nY - 1))
