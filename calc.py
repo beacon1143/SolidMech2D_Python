@@ -1,6 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+def make_plot(fig, plot, x, y, field, name):
+    gr = plot.pcolormesh(x, y, field, shading='auto')
+    plot.axis('scaled')
+    plot.set_title(name)
+    fig.colorbar(gr, location='right')
+    return gr
+
 # PHYSICS
 lX = 10.0
 lY = 10.0
@@ -33,21 +40,12 @@ vX = np.zeros((nX + 1, nY))
 vY = np.zeros((nX, nY + 1))
 
 plt.ion()    # interactive mode
-fig, graph = plt.subplots(1, 2)
-gr0 = graph[0].pcolormesh(x, y, p)
-
-graph[0].set_xlim(-0.5 * lX, 0.5 * lX)
-graph[0].set_ylim(-0.5 * lY, 0.5 * lY)
-graph[0].axis('scaled')
-graph[0].set_title('p')
-fig.colorbar(gr0)
-
-gr1 = graph[1].pcolormesh(x, y, tauXX)
-fig.colorbar(gr1)
-graph[1].set_xlim(-0.5 * lX, 0.5 * lX)
-graph[1].set_ylim(-0.5 * lY, 0.5 * lY)
-graph[1].axis('scaled')
-graph[1].set_title('tau_xx')
+fig, graph = plt.subplots(2, 2)
+gr = []
+gr.append(make_plot(fig, graph[0, 0], x, y, p, 'p'))
+gr.append(make_plot(fig, graph[0, 1], x, y, tauXX, 'tau_xx'))
+gr.append(make_plot(fig, graph[1, 0], x, y, tauXX, 'tau_yy'))
+gr.append(make_plot(fig, graph[1, 1], x, y, tauXY, 'tau_xy'))
 plt.pause(0.1)
 
 # ACTION LOOP
@@ -61,9 +59,11 @@ for i in range(nSteps):
     vX[1:-1, 1:-1] = (1 - dmp) * vX[1:-1, 1:-1] + dvXdt * dt
     dvYdt = (np.diff(-p[1:-1, :] + tauYY[1:-1, :], 1, 1) / dY + np.diff(tauXY, 1, 0) / dX ) / rho
     vY[1:-1, 1:-1] = (1 - dmp) * vY[1:-1, 1:-1] + dvYdt * dt
-    gr0.remove()
-    gr1.remove()
-    gr0 = graph[0].pcolormesh(x, y, p)
-    gr1 = graph[1].pcolormesh(x, y, tauXX)
+    for g in gr:
+        g.remove()
+    gr[0] = graph[0, 0].pcolormesh(x, y, p, shading='auto')
+    gr[1] = graph[0, 1].pcolormesh(x, y, tauXX, shading='auto')
+    gr[2] = graph[1, 0].pcolormesh(x, y, tauYY, shading='auto')
+    gr[3] = graph[1, 1].pcolormesh(x, y, tauXY, shading='auto')
     fig.suptitle(str(i+1))
     plt.pause(0.0001)
