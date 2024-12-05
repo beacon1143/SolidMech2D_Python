@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as ani
 
 def make_plot(fig, plot, x, y, field, name):
     gr = plot.pcolormesh(x, y, field, shading='auto')
@@ -39,31 +40,31 @@ tauXY = np.zeros((nX - 1, nY - 1))
 vX = np.zeros((nX + 1, nY))
 vY = np.zeros((nX, nY + 1))
 
-plt.ion()    # interactive mode
 fig, graph = plt.subplots(2, 2)
 gr = []
 gr.append(make_plot(fig, graph[0, 0], x, y, p, 'p'))
 gr.append(make_plot(fig, graph[0, 1], x, y, tauXX, 'tau_xx'))
 gr.append(make_plot(fig, graph[1, 0], x, y, tauXX, 'tau_yy'))
-gr.append(make_plot(fig, graph[1, 1], x, y, tauXY, 'tau_xy'))
-plt.pause(0.1)
+gr.append(make_plot(fig, graph[1, 1], x[:-1, :-1], y[:-1, :-1], tauXY, 'tau_xy'))
 
 # ACTION LOOP
-for i in range(nSteps):
+def action_loop(i):
     divV = np.diff(vX, 1, 0) / dX + np.diff(vY, 1, 1) / dY
-    p = p - divV * K * dt
-    tauXX = tauXX + (np.diff(vX, 1, 0) / dX - divV / 3.0) * 2.0 * G * dt
-    tauYY = tauYY + (np.diff(vY, 1, 1) / dY - divV / 3.0) * 2.0 * G * dt
-    tauXY = tauXY + (np.diff(vX[1:-1, :], 1, 1) / dY + np.diff(vY[:, 1:-1], 1, 0) / dY) * G * dt
+    p[:] = p - divV * K * dt
+    tauXX[:] = tauXX + (np.diff(vX, 1, 0) / dX - divV / 3.0) * 2.0 * G * dt
+    tauYY[:] = tauYY + (np.diff(vY, 1, 1) / dY - divV / 3.0) * 2.0 * G * dt
+    tauXY[:] = tauXY + (np.diff(vX[1:-1, :], 1, 1) / dY + np.diff(vY[:, 1:-1], 1, 0) / dY) * G * dt
     dvXdt = (np.diff(-p[:, 1:-1] + tauXX[:, 1:-1], 1, 0) / dX + np.diff(tauXY, 1, 1) / dY) / rho
     vX[1:-1, 1:-1] = (1 - dmp) * vX[1:-1, 1:-1] + dvXdt * dt
     dvYdt = (np.diff(-p[1:-1, :] + tauYY[1:-1, :], 1, 1) / dY + np.diff(tauXY, 1, 0) / dX ) / rho
     vY[1:-1, 1:-1] = (1 - dmp) * vY[1:-1, 1:-1] + dvYdt * dt
-    for g in gr:
-        g.remove()
-    gr[0] = graph[0, 0].pcolormesh(x, y, p, shading='auto')
-    gr[1] = graph[0, 1].pcolormesh(x, y, tauXX, shading='auto')
-    gr[2] = graph[1, 0].pcolormesh(x, y, tauYY, shading='auto')
-    gr[3] = graph[1, 1].pcolormesh(x, y, tauXY, shading='auto')
+
     fig.suptitle(str(i+1))
-    plt.pause(0.0001)
+    gr[0].set_array(p)
+    gr[1].set_array(tauXX)
+    gr[2].set_array(tauYY)
+    gr[3].set_array(tauXY)
+    return gr
+
+anim = ani.FuncAnimation(fig=fig, func=action_loop, frames=nSteps, interval=10, repeat=False, repeat_delay=0)
+plt.show()
