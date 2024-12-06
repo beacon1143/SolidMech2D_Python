@@ -64,6 +64,10 @@ def action_loop(i):
     gr[1].set_array(tauXX)
     gr[2].set_array(tauYY)
     gr[3].set_array(tauXY)
+    gr[0].set_clim([p.min(), p.max()])
+    gr[1].set_clim([tauXX.min(), tauXX.max()])
+    gr[2].set_clim([tauYY.min(), tauYY.max()])
+    gr[3].set_clim([tauXY.min(), tauXY.max()])
     return gr
 
 anim = ani.FuncAnimation(fig=fig, func=action_loop, frames=nSteps, interval=10, repeat=False, repeat_delay=0)
