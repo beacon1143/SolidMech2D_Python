@@ -14,7 +14,7 @@ cfl = 1.0
 # PREPROCESSING
 x = np.linspace(-0.5 * lx, 0.5 * lx, nx)
 dx = lx / (nx - 1)
-dt = cfl * dx * dx / lam / rhocp / 2.0
+dt = cfl * dx * dx * rhocp / lam / 2.0
 
 # INITIAL CONDITIONS
 T0 = 1.0
